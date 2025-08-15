@@ -1,34 +1,53 @@
 from flask import Flask, request, jsonify
+import json
+import os
 
 app = Flask(__name__)
+DATA_FILE = "invoices.json"
 
-# Mock veri tabanı
-invoices = []
+# JSON dosyası yoksa oluştur
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, "w") as f:
+        json.dump([], f)
 
-@app.route("/create_invoice", methods=["POST"])
-def create_invoice():
-    data = request.json
-    invoice_id = len(invoices) + 1
-    invoice = {
-        "invoice_id": invoice_id,
-        "contact_id": data.get("contact_id", 1),
-        "issue_date": data.get("issue_date", "2025-08-13"),
-        "due_date": data.get("due_date", "2025-08-20"),
-        "lines": data.get("lines", [{"item_id": 1, "quantity": 1, "unit_price": 100}]),
-        "status": "draft"
-    }
-    invoices.append(invoice)
-    return jsonify({"status": "success", "invoice": invoice}), 201
+# Verileri oku
+def read_invoices():
+    with open(DATA_FILE, "r") as f:
+        return json.load(f)
 
+# Verileri yaz
+def write_invoices(data):
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
+@app.route("/")
+def home():
+    return jsonify({"message": "Mock Invoice API is running"}), 200
+
+# Tüm faturaları listele
 @app.route("/invoices", methods=["GET"])
 def get_invoices():
+    invoices = read_invoices()
     return jsonify({"status": "success", "invoices": invoices}), 200
 
-@app.route("/delete_invoice/<int:invoice_id>", methods=["DELETE"])
-def delete_invoice(invoice_id):
-    global invoices
-    invoices = [inv for inv in invoices if inv["invoice_id"] != invoice_id]
-    return jsonify({"status": "success", "message": f"Invoice {invoice_id} deleted"}), 200
+# Yeni fatura oluştur
+@app.route("/invoices", methods=["POST"])
+def create_invoice():
+    data = request.json
+
+    # Zorunlu alan kontrolü
+    required_fields = ["contact_id", "due_date", "issue_date", "lines", "status"]
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"status": "error", "message": f"{field} is required"}), 400
+
+    # Otomatik invoice_id atama
+    invoices = read_invoices()
+    data["invoice_id"] = len(invoices) + 1
+    invoices.append(data)
+    write_invoices(invoices)
+
+    return jsonify({"status": "success", "invoice": data}), 201
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,61 @@
+{
+  "info": {
+    "name": "Mock Invoice API – Tam Test",
+    "_postman_id": "a1b2c3d4-5678-4abc-9876-abcdef123456",
+    "description": "Otomatik invoice_id atayan, gerçekçi fatura verisi ile test koleksiyonu",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Home",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": [""]
+        }
+      }
+    },
+    {
+      "name": "Get All Invoices",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/invoices",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": ["invoices"]
+        }
+      }
+    },
+    {
+      "name": "Create Invoice – Realistic",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"contact_id\": 987654,\n    \"contact_name\": \"ABC Teknoloji A.Ş.\",\n    \"contact_tax_no\": \"1234567890\",\n    \"issue_date\": \"2025-08-15\",\n    \"due_date\": \"2025-08-30\",\n    \"currency\": \"TRY\",\n    \"lines\": [\n        {\n            \"item_id\": 101,\n            \"description\": \"Dell XPS 15 Laptop\",\n            \"quantity\": 1,\n            \"unit_price\": 42000,\n            \"tax_rate\": 18\n        },\n        {\n            \"item_id\": 102,\n            \"description\": \"Logitech MX Master 3 Mouse\",\n            \"quantity\": 2,\n            \"unit_price\": 2500,\n            \"tax_rate\": 18\n        }\n    ],\n    \"status\": \"draft\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:5000/invoices",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": ["invoices"]
+        }
+      }
+    }
+  ]
+}

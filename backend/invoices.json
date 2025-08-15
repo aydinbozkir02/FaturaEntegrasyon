@@ -1,0 +1,94 @@
+[
+    {
+        "contact_id": 2199560,
+        "due_date": "2025-08-20",
+        "invoice_id": 1,
+        "issue_date": "2025-08-13",
+        "lines": [
+            {
+                "item_id": 1,
+                "quantity": 2,
+                "unit_price": 150
+            }
+        ],
+        "status": "draft"
+    },
+    {
+        "invoice_id": 1,
+        "contact_id": 987654,
+        "contact_name": "ABC Teknoloji A.\u015e.",
+        "contact_tax_no": "1234567890",
+        "issue_date": "2025-08-15",
+        "due_date": "2025-08-30",
+        "currency": "TRY",
+        "lines": [
+            {
+                "item_id": 101,
+                "description": "Dell XPS 15 Laptop",
+                "quantity": 1,
+                "unit_price": 42000,
+                "tax_rate": 18
+            },
+            {
+                "item_id": 102,
+                "description": "Logitech MX Master 3 Mouse",
+                "quantity": 2,
+                "unit_price": 2500,
+                "tax_rate": 18
+            }
+        ],
+        "status": "draft"
+    },
+    {
+        "contact_id": 987654,
+        "contact_name": "ABC Teknoloji A.\u015e.",
+        "contact_tax_no": "1234567890",
+        "issue_date": "2025-08-15",
+        "due_date": "2025-08-30",
+        "currency": "TRY",
+        "lines": [
+            {
+                "item_id": 101,
+                "description": "Dell XPS 15 Laptop",
+                "quantity": 1,
+                "unit_price": 42000,
+                "tax_rate": 18
+            },
+            {
+                "item_id": 102,
+                "description": "Logitech MX Master 3 Mouse",
+                "quantity": 2,
+                "unit_price": 2500,
+                "tax_rate": 18
+            }
+        ],
+        "status": "draft",
+        "invoice_id": 3
+    },
+    {
+        "contact_id": 987654,
+        "contact_name": "ABC Teknoloji A.\u015e.",
+        "contact_tax_no": "1234567890",
+        "issue_date": "2025-08-15",
+        "due_date": "2025-08-30",
+        "currency": "TRY",
+        "lines": [
+            {
+                "item_id": 101,
+                "description": "Dell XPS 15 Laptop",
+                "quantity": 1,
+                "unit_price": 42000,
+                "tax_rate": 18
+            },
+            {
+                "item_id": 102,
+                "description": "Logitech MX Master 3 Mouse",
+                "quantity": 2,
+                "unit_price": 2500,
+                "tax_rate": 18
+            }
+        ],
+        "status": "draft",
+        "invoice_id": 4
+    }
+]
