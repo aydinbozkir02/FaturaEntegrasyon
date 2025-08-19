@@ -1,0 +1,10 @@
+PROJE YAPISI
+
+backend/
+│
+├── app.py             # Flask uygulaması ve route’lar
+├── db.py              # Veritabanı bağlantısı ve setup
+├── models.py          # Veri modelleri (Müşteri, Fatura, Kalem)
+└── utils.py           # Yardımcı fonksiyonlar (validation, conversion vs.)
+
+

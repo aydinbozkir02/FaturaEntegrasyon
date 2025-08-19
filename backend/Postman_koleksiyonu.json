@@ -1,0 +1,84 @@
+{
+  "info": {
+    "name": "Fatura API",
+    "_postman_id": "f4b2a1c0-1234-5678-90ab-cdef12345678",
+    "description": "Modüler Fatura API Postman Koleksiyonu",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET Tüm Faturalar",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/invoices",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": ["invoices"]
+        }
+      }
+    },
+    {
+      "name": "POST Yeni Fatura",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"contact_id\": 1,\n    \"issue_date\": \"2025-08-19\",\n    \"due_date\": \"2025-08-26\",\n    \"status\": \"taslak\",\n    \"lines\": [\n        {\"description\": \"Ürün A\", \"quantity\": 2, \"unit_price\": 150},\n        {\"description\": \"Ürün B\", \"quantity\": 1, \"unit_price\": 200}\n    ]\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:5000/invoices",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": ["invoices"]
+        }
+      }
+    },
+    {
+      "name": "PUT Fatura Güncelle",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"status\": \"onaylandı\",\n    \"due_date\": \"2025-08-30\"\n}"
+        },
+        "url": {
+          "raw": "http://127.0.0.1:5000/invoices/1",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": ["invoices", "1"]
+        }
+      }
+    },
+    {
+      "name": "DELETE Fatura Sil",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:5000/invoices/1",
+          "protocol": "http",
+          "host": ["127.0.0.1"],
+          "port": "5000",
+          "path": ["invoices", "1"]
+        }
+      }
+    }
+  ]
+}

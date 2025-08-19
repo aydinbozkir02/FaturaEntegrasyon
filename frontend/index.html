@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fatura Yönetimi</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        button { padding: 5px 10px; margin: 2px; }
+        input, select { padding: 5px; margin: 2px; width: 150px; }
+        .form-group { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Fatura Yönetimi</h2>
+
+    <h3>Yeni / Güncelle Fatura</h3>
+    <div id="invoice-form">
+        <div class="form-group">
+            <label>Müşteri ID:</label>
+            <input type="number" id="contact_id">
+        </div>
+        <div class="form-group">
+            <label>Tarih:</label>
+            <input type="date" id="issue_date">
+        </div>
+        <div class="form-group">
+            <label>Vade:</label>
+            <input type="date" id="due_date">
+        </div>
+        <div class="form-group">
+            <label>Durum:</label>
+            <select id="status">
+                <option value="draft">Taslak</option>
+                <option value="sent">Gönderildi</option>
+                <option value="paid">Ödendi</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Ürün Açıklaması:</label>
+            <input type="text" id="description">
+            <label>Adet:</label>
+            <input type="number" id="quantity">
+            <label>Birim Fiyat:</label>
+            <input type="number" id="unit_price">
+        </div>
+        <input type="hidden" id="edit_id">
+        <button onclick="submitInvoice()">Kaydet / Güncelle</button>
+    </div>
+
+    <h3>Fatura Listesi</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Müşteri ID</th>
+                <th>Tarih</th>
+                <th>Vade</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody id="invoice-table"></tbody>
+    </table>
+
+    <script>
+        // Faturaları yükle
+        function loadInvoices() {
+            fetch("http://127.0.0.1:5000/invoices")
+                .then(res => res.json())
+                .then(data => {
+                    const tbody = document.getElementById("invoice-table");
+                    tbody.innerHTML = "";
+                    data.invoices.forEach(inv => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+                            <td>${inv.invoice_id}</td>
+                            <td>${inv.contact_id}</td>
+                            <td>${inv.issue_date}</td>
+                            <td>${inv.due_date}</td>
+                            <td>${inv.status}</td>
+                            <td>
+                                <button onclick="loadInvoiceToForm(${inv.invoice_id})">Düzenle</button>
+                                <button onclick="deleteInvoice(${inv.invoice_id})">Sil</button>
+                                <button onclick="downloadPDF(${inv.invoice_id})">PDF İndir</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                });
+        }
+
+        // Yeni veya güncelle fatura gönder
+        function submitInvoice() {
+            const edit_id = document.getElementById("edit_id").value;
+            const data = {
+                contact_id: Number(document.getElementById("contact_id").value),
+                issue_date: document.getElementById("issue_date").value,
+                due_date: document.getElementById("due_date").value,
+                status: document.getElementById("status").value,
+                lines: [
+                    {
+                        description: document.getElementById("description").value,
+                        quantity: Number(document.getElementById("quantity").value),
+                        unit_price: Number(document.getElementById("unit_price").value)
+                    }
+                ]
+            };
+
+            if(edit_id) {
+                // PUT request
+                fetch(`http://127.0.0.1:5000/invoices/${edit_id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    alert(res.status === "success" ? "Fatura güncellendi" : res.message);
+                    clearForm();
+                    loadInvoices();
+                });
+            } else {
+                // POST request
+                fetch("http://127.0.0.1:5000/invoices", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(res => {
+                    alert(res.status === "success" ? "Fatura eklendi" : res.message);
+                    clearForm();
+                    loadInvoices();
+                });
+            }
+        }
+
+        function loadInvoiceToForm(id) {
+            fetch("http://127.0.0.1:5000/invoices")
+                .then(res => res.json())
+                .then(data => {
+                    const inv = data.invoices.find(i => i.invoice_id === id);
+                    if(inv) {
+                        document.getElementById("edit_id").value = inv.invoice_id;
+                        document.getElementById("contact_id").value = inv.contact_id;
+                        document.getElementById("issue_date").value = inv.issue_date;
+                        document.getElementById("due_date").value = inv.due_date;
+                        document.getElementById("status").value = inv.status;
+                        if(inv.lines && inv.lines.length > 0) {
+                            document.getElementById("description").value = inv.lines[0].description;
+                            document.getElementById("quantity").value = inv.lines[0].quantity;
+                            document.getElementById("unit_price").value = inv.lines[0].unit_price;
+                        }
+                    }
+                });
+        }
+
+        function clearForm() {
+            document.getElementById("edit_id").value = "";
+            document.getElementById("contact_id").value = "";
+            document.getElementById("issue_date").value = "";
+            document.getElementById("due_date").value = "";
+            document.getElementById("status").value = "draft";
+            document.getElementById("description").value = "";
+            document.getElementById("quantity").value = "";
+            document.getElementById("unit_price").value = "";
+        }
+
+        function deleteInvoice(id) {
+            fetch(`http://127.0.0.1:5000/invoices/${id}`, { method: "DELETE" })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    loadInvoices();
+                });
+        }
+
+        function downloadPDF(id) {
+            fetch(`http://127.0.0.1:5000/invoices/${id}/pdf`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "success") {
+                        alert("PDF yolu: " + data.pdf_path);
+                        // PDF'i yeni sekmede açmak için:
+                        // window.open(data.pdf_path, "_blank");
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        }
+
+        window.onload = loadInvoices;
+    </script>
+</body>
+</html>
