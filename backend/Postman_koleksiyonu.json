@@ -1,120 +1,137 @@
 {
   "info": {
-    "name": "Fatura API (Contacts ile)",
-    "_postman_id": "f4b2a1c0-1234-5678-90ab-cdefCONTACTS",
-    "description": "Fatura API + Contacts CRUD",
+    "name": "Fatura Entegrasyon - Tüm CRUD",
+    "_postman_id": "8d7c7b7e-aaaa-bbbb-cccc-ddddeeeffff0",
+    "description": "Invoices + Contacts + Items tüm uçlar (local)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+
     {
-      "name": "GET Tüm Faturalar",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://127.0.0.1:5000/invoices",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["invoices"]
-        }
-      }
-    },
-    {
-      "name": "POST Yeni Fatura",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"contact_id\": 1,\n    \"issue_date\": \"2025-08-19\",\n    \"due_date\": \"2025-08-26\",\n    \"status\": \"taslak\",\n    \"lines\": [\n        {\"description\": \"Ürün A\", \"quantity\": 2, \"unit_price\": 150},\n        {\"description\": \"Ürün B\", \"quantity\": 1, \"unit_price\": 200}\n    ]\n}"
+      "name": "INVOICES",
+      "item": [
+        {
+          "name": "GET Tüm Faturalar",
+          "request": { "method": "GET", "url": "http://127.0.0.1:5000/invoices" }
         },
-        "url": {
-          "raw": "http://127.0.0.1:5000/invoices",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["invoices"]
-        }
-      }
-    },
-    {
-      "name": "GET Tüm Müşteriler",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://127.0.0.1:5000/contacts",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["contacts"]
-        }
-      }
-    },
-    {
-      "name": "POST Yeni Müşteri",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"name\": \"ABC Teknoloji A.Ş.\",\n    \"tax_no\": \"1234567890\",\n    \"email\": \"info@abc.com\",\n    \"phone\": \"+90 212 000 00 00\",\n    \"address\": \"Maslak Mah.\",\n    \"city\": \"İstanbul\",\n    \"country\": \"TR\"\n}"
+        {
+          "name": "POST Yeni Fatura",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_id\": 1,\n  \"issue_date\": \"2025-08-19\",\n  \"due_date\": \"2025-08-26\",\n  \"status\": \"draft\",\n  \"lines\": [\n    {\"description\": \"Ürün A\", \"quantity\": 2, \"unit_price\": 150},\n    {\"description\": \"Ürün B\", \"quantity\": 1, \"unit_price\": 200}\n  ]\n}"
+            },
+            "url": "http://127.0.0.1:5000/invoices"
+          }
         },
-        "url": {
-          "raw": "http://127.0.0.1:5000/contacts",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["contacts"]
-        }
-      }
-    },
-    {
-      "name": "GET Tek Müşteri",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://127.0.0.1:5000/contacts/1",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["contacts", "1"]
-        }
-      }
-    },
-    {
-      "name": "PUT Müşteri Güncelle",
-      "request": {
-        "method": "PUT",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"name\": \"ABC Teknoloji AŞ\",\n    \"city\": \"İstanbul\",\n    \"country\": \"TR\"\n}"
+        {
+          "name": "PUT Fatura Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contact_id\": 1,\n  \"issue_date\": \"2025-08-20\",\n  \"due_date\": \"2025-08-30\",\n  \"status\": \"sent\",\n  \"lines\": [\n    {\"description\": \"Ürün A (güncel)\", \"quantity\": 3, \"unit_price\": 140}\n  ]\n}"
+            },
+            "url": "http://127.0.0.1:5000/invoices/1"
+          }
         },
-        "url": {
-          "raw": "http://127.0.0.1:5000/contacts/1",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["contacts", "1"]
+        {
+          "name": "DELETE Fatura Sil",
+          "request": { "method": "DELETE", "url": "http://127.0.0.1:5000/invoices/1" }
+        },
+        {
+          "name": "GET Fatura PDF",
+          "request": { "method": "GET", "url": "http://127.0.0.1:5000/invoices/1/pdf" }
         }
-      }
+      ]
     },
+
     {
-      "name": "DELETE Müşteri Sil",
-      "request": {
-        "method": "DELETE",
-        "header": [],
-        "url": {
-          "raw": "http://127.0.0.1:5000/contacts/1",
-          "protocol": "http",
-          "host": ["127.0.0.1"],
-          "port": "5000",
-          "path": ["contacts", "1"]
+      "name": "CONTACTS",
+      "item": [
+        {
+          "name": "GET Tüm Müşteriler",
+          "request": { "method": "GET", "url": "http://127.0.0.1:5000/contacts" }
+        },
+        {
+          "name": "POST Yeni Müşteri",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ABC Teknoloji A.Ş.\",\n  \"tax_no\": \"1234567890\",\n  \"email\": \"info@abc.com\",\n  \"phone\": \"+90 212 000 00 00\",\n  \"address\": \"Maslak Mah.\",\n  \"city\": \"İstanbul\",\n  \"country\": \"TR\"\n}"
+            },
+            "url": "http://127.0.0.1:5000/contacts"
+          }
+        },
+        {
+          "name": "GET Tek Müşteri",
+          "request": { "method": "GET", "url": "http://127.0.0.1:5000/contacts/1" }
+        },
+        {
+          "name": "PUT Müşteri Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"ABC Teknoloji AŞ\",\n  \"email\": \"destek@abc.com\",\n  \"city\": \"İstanbul\",\n  \"country\": \"TR\"\n}"
+            },
+            "url": "http://127.0.0.1:5000/contacts/1"
+          }
+        },
+        {
+          "name": "DELETE Müşteri Sil",
+          "request": { "method": "DELETE", "url": "http://127.0.0.1:5000/contacts/1" }
         }
-      }
+      ]
+    },
+
+    {
+      "name": "ITEMS",
+      "item": [
+        {
+          "name": "GET Tüm Ürünler",
+          "request": { "method": "GET", "url": "http://127.0.0.1:5000/items" }
+        },
+        {
+          "name": "POST Yeni Ürün",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"P-1001\",\n  \"name\": \"Dell Laptop\",\n  \"unit\": \"adet\",\n  \"unit_price\": 42000,\n  \"tax_rate\": 18,\n  \"stock_qty\": 10\n}"
+            },
+            "url": "http://127.0.0.1:5000/items"
+          }
+        },
+        {
+          "name": "GET Tek Ürün",
+          "request": { "method": "GET", "url": "http://127.0.0.1:5000/items/1" }
+        },
+        {
+          "name": "PUT Ürün Güncelle",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sku\": \"P-1001\",\n  \"name\": \"Dell Laptop 15\",\n  \"unit\": \"adet\",\n  \"unit_price\": 41500,\n  \"tax_rate\": 18,\n  \"stock_qty\": 8\n}"
+            },
+            "url": "http://127.0.0.1:5000/items/1"
+          }
+        },
+        {
+          "name": "DELETE Ürün Sil",
+          "request": { "method": "DELETE", "url": "http://127.0.0.1:5000/items/1" }
+        }
+      ]
     }
+
   ]
 }

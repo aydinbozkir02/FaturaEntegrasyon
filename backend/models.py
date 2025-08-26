@@ -122,3 +122,66 @@ def delete_contact(contact_id):
     deleted = cur.rowcount > 0
     conn.close()
     return deleted
+
+# ---- ITEMS CRUD ----
+def get_items():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM items ORDER BY item_id DESC")
+    rows = cur.fetchall()
+    items = [dict(r) for r in rows]
+    conn.close()
+    return items
+
+def get_item(item_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM items WHERE item_id=?", (item_id,))
+    r = cur.fetchone()
+    conn.close()
+    return dict(r) if r else None
+
+def add_item(data):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO items (sku, name, unit, unit_price, tax_rate, stock_qty)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("sku"), data.get("name"), data.get("unit"),
+        data.get("unit_price"), data.get("tax_rate"),
+        data.get("stock_qty", 0)
+    ))
+    conn.commit()
+    new_id = cur.lastrowid
+    conn.close()
+    return new_id
+
+def update_item(item_id, data):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM items WHERE item_id=?", (item_id,))
+    if cur.fetchone() is None:
+        conn.close()
+        return False
+    cur.execute("""
+        UPDATE items
+        SET sku=?, name=?, unit=?, unit_price=?, tax_rate=?, stock_qty=?
+        WHERE item_id=?
+    """, (
+        data.get("sku"), data.get("name"), data.get("unit"),
+        data.get("unit_price"), data.get("tax_rate"),
+        data.get("stock_qty", 0), item_id
+    ))
+    conn.commit()
+    conn.close()
+    return True
+
+def delete_item(item_id):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM items WHERE item_id=?", (item_id,))
+    conn.commit()
+    deleted = cur.rowcount > 0
+    conn.close()
+    return deleted

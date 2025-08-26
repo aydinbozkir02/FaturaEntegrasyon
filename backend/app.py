@@ -4,7 +4,8 @@ from flask_cors import CORS
 from db import init_db
 from models import (
     add_invoice, get_all_invoices, update_invoice, delete_invoice,
-    get_contacts, get_contact, add_contact, update_contact, delete_contact
+    get_contacts, get_contact, add_contact, update_contact, delete_contact,
+    get_items, get_item, add_item, update_item, delete_item
 )
 from utils import validate_invoice, generate_invoice_pdf
 
@@ -89,6 +90,41 @@ def remove_contact(contact_id):
     if not ok:
         return jsonify({"status": "error", "message": "Müşteri bulunamadı"}), 404
     return jsonify({"status": "success", "message": f"Müşteri {contact_id} silindi"}), 200
+
+# ---- ITEMS ROUTES ----
+@app.route('/items', methods=['GET'])
+def list_items():
+    return jsonify({"status": "success", "items": get_items()}), 200
+
+@app.route('/items/<int:item_id>', methods=['GET'])
+def get_item_by_id(item_id):
+    item = get_item(item_id)
+    if not item:
+        return jsonify({"status": "error", "message": "Ürün bulunamadı"}), 404
+    return jsonify({"status": "success", "item": item}), 200
+
+@app.route('/items', methods=['POST'])
+def create_item():
+    data = request.json or {}
+    if not data.get("name"):
+        return jsonify({"status": "error", "message": "name alanı zorunlu"}), 400
+    new_id = add_item(data)
+    return jsonify({"status": "success", "item_id": new_id}), 201
+
+@app.route('/items/<int:item_id>', methods=['PUT'])
+def edit_item(item_id):
+    data = request.json or {}
+    ok = update_item(item_id, data)
+    if not ok:
+        return jsonify({"status": "error", "message": "Ürün bulunamadı"}), 404
+    return jsonify({"status": "success", "item_id": item_id}), 200
+
+@app.route('/items/<int:item_id>', methods=['DELETE'])
+def remove_item(item_id):
+    ok = delete_item(item_id)
+    if not ok:
+        return jsonify({"status": "error", "message": "Ürün bulunamadı"}), 404
+    return jsonify({"status": "success", "message": f"Ürün {item_id} silindi"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
