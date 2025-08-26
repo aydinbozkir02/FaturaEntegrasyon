@@ -16,11 +16,37 @@ def init_db():
             lines TEXT NOT NULL
         )
     """)
+    # Yeni: contacts tablosu
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS contacts (
+            contact_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            tax_no TEXT,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
+            city TEXT,
+            country TEXT
+        )
+    """)
+
+    # Yeni: items tablosu
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS items (
+            item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            sku TEXT UNIQUE,
+            name TEXT NOT NULL,
+            unit TEXT,
+            unit_price REAL NOT NULL,
+            tax_rate REAL NOT NULL,
+            stock_qty INTEGER DEFAULT 0
+        )
+    """)
+
     conn.commit()
     conn.close()
 
 def get_db_connection():
-    """Veritabanı bağlantısı oluştur ve döndür"""
     conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row  # Satırları dict gibi kullanabilmek için
+    conn.row_factory = sqlite3.Row
     return conn
