@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stok Yönetimi • Ürünler</title>
+  <style>
+    :root{
+      --bg:#0f1115;--card:#171923;--muted:#232737;--text:#e7e9ee;--text-dim:#aab0c0;--brand:#7c5cff;--brand-2:#4fd1c5;--danger:#ff5c7c;--warning:#ffc861;--ok:#5cff92;--radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font:14px/1.5 Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#0c0e13,#0f1115 40%);color:var(--text)}
+    .container{max-width:1200px;margin:32px auto;padding:0 16px}
+    .grid{display:grid;gap:16px}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.0));border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+    .card>.hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .card>.bd{padding:16px}
+    .title{font-size:18px;font-weight:800}
+    .muted{color:var(--text-dim)}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+    button{appearance:none;border:0;border-radius:12px;padding:10px 12px;background:var(--muted);color:var(--text);cursor:pointer;transition:transform .04s ease,filter .15s ease}
+    button:hover{filter:brightness(1.08)} button:active{transform:translateY(1px)}
+    .btn-primary{background:linear-gradient(180deg,var(--brand),#5e3bff)}
+    .btn-soft{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02))}
+    .btn-danger{background:linear-gradient(180deg,#ff5c7c,#d63a5a)}
+    .btn-ghost{background:transparent;border:1px dashed rgba(255,255,255,.15)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:120px;flex:1}
+    .field label{font-size:12px;color:var(--text-dim)}
+    input,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:#0b0d12;color:var(--text)}
+    table{width:100%;border-collapse:collapse;background:#0b0d12;border-radius:12px;overflow:hidden}
+    thead th{background:#0e121a;color:var(--text-dim);text-align:left;font-weight:600;font-size:12px;padding:10px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer}
+    tbody td{padding:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .empty{padding:18px;text-align:center;color:var(--text-dim)}
+    .kbd{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:var(--text-dim);background:#0b0d12;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:2px 6px}
+    .badge{padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid rgba(255,255,255,.12)}
+    .badge.low{background:rgba(255,92,124,.15);color:#ffc1cf;border-color:rgba(255,92,124,.4)}
+    .badge.ok{background:rgba(92,255,146,.15);color:#d1ffe0;border-color:rgba(92,255,146,.4)}
+    .toast{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:1000}
+    .toast .msg{background:#10131a;border:1px solid rgba(255,255,255,.1);border-left:4px solid var(--brand);padding:10px 12px;border-radius:12px;box-shadow:0 10px 22px rgba(0,0,0,.35)}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px}
+    .modal.open{display:flex}
+    .modal .content{background:var(--card);border:1px solid rgba(255,255,255,.06);padding:18px;border-radius:16px;max-width:640px;width:100%}
+    .hint{font-size:12px;color:var(--text-dim)}
+    .pagination{display:flex;gap:8px;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="container grid">
+    <header class="grid card" style="padding:16px">
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div class="title">Stok Yönetimi</div>
+          <div class="muted">Ürün CRUD • Stok hareketleri • CSV dışa aktarma</div>
+        </div>
+        <div class="toolbar">
+          <button id="backBtn" type="button" class="btn-soft">← Faturalara Dön</button>
+          <button id="refreshBtn" type="button" class="btn-soft">Yenile</button>
+          <button id="exportBtn" type="button" class="btn-soft">CSV Dışa Aktar</button>
+          <button id="settingsBtn" type="button" class="btn-soft">Ayarlar</button>
+          <button id="newItemBtn" type="button" class="btn-primary">Yeni Ürün</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div class="field" style="max-width:240px">
+          <label>Arama</label>
+          <input id="q" type="text" placeholder="SKU, ad, birim..." />
+        </div>
+        <div class="field" style="max-width:200px">
+          <label>Stok Durumu</label>
+          <select id="stockFilter">
+            <option value="">Hepsi</option>
+            <option value="low">Düşük Stok</option>
+            <option value="ok">Yeterli</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:160px">
+          <label>Sayfa Boyutu</label>
+          <select id="pageSize">
+            <option>10</option>
+            <option selected>25</option>
+            <option>50</option>
+          </select>
+        </div>
+        <div class="right"><span class="hint">API: <span class="kbd" id="apiLabel">http://127.0.0.1:5000</span></span></div>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="hd">
+        <div class="title">Ürün Listesi</div>
+        <div class="pagination">
+          <button id="prevPage" type="button" class="btn-soft">◀</button>
+          <span class="hint">Sayfa <span id="pageNo">1</span></span>
+          <button id="nextPage" type="button" class="btn-soft">▶</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div style="overflow:auto;border-radius:12px">
+          <table>
+            <thead>
+              <tr>
+                <th data-key="sku">SKU</th>
+                <th data-key="name">Ad</th>
+                <th data-key="unit">Birim</th>
+                <th data-key="unit_price">Birim Fiyat</th>
+                <th data-key="tax_rate">KDV %</th>
+                <th data-key="stock_qty">Stok</th>
+                <th>Durum</th>
+                <th style="width:260px">İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div id="empty" class="empty" style="display:none">Kayıt yok</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Ürün Form Modal -->
+  <div class="modal" id="itemModal">
+    <div class="content">
+      <div class="title" id="itemModalTitle">Yeni Ürün</div>
+      <form id="itemForm" class="grid" autocomplete="off">
+        <input type="hidden" id="item_id" />
+        <div class="row">
+          <div class="field"><label>SKU</label><input id="sku" type="text" placeholder="örn. PRD-001" required /></div>
+          <div class="field"><label>Ad</label><input id="name" type="text" placeholder="Ürün adı" required /></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Birim</label><input id="unit" type="text" placeholder="adet, kg, kutu..." required /></div>
+          <div class="field"><label>Birim Fiyat</label><input id="unit_price" type="number" min="0" step="0.01" placeholder="0" required /></div>
+          <div class="field"><label>KDV %</label><input id="tax_rate" type="number" min="0" step="1" placeholder="0" value="0" /></div>
+          <div class="field"><label>Stok Adedi</label><input id="stock_qty" type="number" min="0" step="1" placeholder="0" value="0" /></div>
+        </div>
+        <div class="row" style="justify-content:flex-end">
+          <button type="button" class="btn-soft" onclick="closeItemModal()">Vazgeç</button>
+          <button type="submit" class="btn-primary">Kaydet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sil Onay Modal -->
+  <div class="modal" id="confirmModal">
+    <div class="content">
+      <div class="title">Emin misin?</div>
+      <p class="muted" id="confirmText">Bu ürünü silmek üzeresin.</p>
+      <div class="row" style="margin-top:10px;justify-content:flex-end">
+        <button class="btn-soft" type="button" onclick="closeConfirm()">Vazgeç</button>
+        <button class="btn-danger" type="button" id="okConfirm">Sil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ayarlar Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="content">
+      <div class="title">Ayarlar</div>
+      <div class="field" style="margin-top:8px">
+        <label>API Adresi</label>
+        <input id="apiInput" type="text" placeholder="http://127.0.0.1:5000" />
+        <div class="hint">Değişiklik kalıcıdır (localStorage).</div>
+      </div>
+      <div class="row" style="margin-top:12px;justify-content:flex-end">
+        <button class="btn-soft" type="button" onclick="closeSettings()">Vazgeç</button>
+        <button class="btn-primary" type="button" onclick="saveSettings()">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = localStorage.getItem('apiBase') || 'http://127.0.0.1:5000';
+    document.getElementById('apiLabel') && (document.getElementById('apiLabel').textContent = API_BASE);
+
+    // State
+    let state = {
+      items: [], filtered: [],
+      query: '', stock: '',
+      page: 1, pageSize: 25,
+      sortKey: 'name', sortDir: 'asc',
+      pendingDelete: null
+    };
+
+    // Helpers
+    const el = id => document.getElementById(id);
+    const fmt = n => (isNaN(n)?'-': new Intl.NumberFormat('tr-TR',{maximumFractionDigits:2}).format(n));
+    function toast(msg){ const t = document.createElement('div'); t.className='msg'; t.textContent=msg; el('toast').appendChild(t); setTimeout(()=>t.remove(),2600) }
+
+    function badge(qty){ return `<span class="badge ${qty<=5?'low':'ok'}">${qty<=5?'Düşük':'Yeterli'}</span>` }
+
+    // API
+    async function api(path, options={}){
+      const res = await fetch(`${API_BASE}${path}`, { headers: { 'Content-Type':'application/json' }, ...options});
+      if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      return res.json();
+    }
+
+    async function load(){
+      try{
+        const json = await api('/items');
+        const list = json.items || [];
+        state.items = list;
+        filter();
+      }catch(e){ toast('Yüklenemedi: '+e.message) }
+    }
+
+    function filter(){
+      const q=(state.query||'').toLowerCase();
+      const st=(state.stock||'');
+      let arr = state.items.filter(x=>{
+        const m = `${x.sku} ${x.name} ${x.unit}`.toLowerCase();
+        const okQ = !q || m.includes(q);
+        let okS = true; if(st==='low') okS = Number(x.stock_qty)<=5; if(st==='ok') okS = Number(x.stock_qty)>5;
+        return okQ && okS;
+      });
+      // sort
+      arr.sort((a,b)=>{
+        const k=state.sortKey, dir=state.sortDir==='asc'?1:-1;
+        const va=a[k], vb=b[k];
+        if(typeof va==='number' && typeof vb==='number') return (va - vb)*dir;
+        return String(va).localeCompare(String(vb),'tr')*dir;
+      });
+      state.filtered=arr;
+      state.page=1; render();
+    }
+
+    function slicePage(){
+      const ps=state.pageSize, start=(state.page-1)*ps; return state.filtered.slice(start,start+ps)
+    }
+
+    function render(){
+      const tbody=el('tbody'); tbody.innerHTML='';
+      const rows=slicePage();
+      if(!rows.length){ el('empty').style.display='block'; return } else el('empty').style.display='none';
+      for(const it of rows){
+        const tr=document.createElement('tr');
+        tr.innerHTML=`
+          <td>${it.sku||'-'}</td>
+          <td>${it.name||'-'}</td>
+          <td>${it.unit||'-'}</td>
+          <td>${fmt(Number(it.unit_price)||0)}</td>
+          <td>${fmt(Number(it.tax_rate)||0)}</td>
+          <td>${fmt(Number(it.stock_qty)||0)}</td>
+          <td>${badge(Number(it.stock_qty)||0)}</td>
+          <td>
+            <div class="row" style="gap:6px">
+              <button class="btn-soft" type="button" onclick='adjust(${it.item_id},1)'>+1</button>
+              <button class="btn-soft" type="button" onclick='adjust(${it.item_id},-1)'>-1</button>
+              <button class="btn-soft" type="button" onclick='editItem(${it.item_id})'>✏️ Düzenle</button>
+              <button class="btn-danger" type="button" onclick='askDelete(${it.item_id})'>🗑️ Sil</button>
+            </div>
+          </td>`;
+        tbody.appendChild(tr);
+      }
+      el('pageNo').textContent=String(state.page);
+    }
+
+    // Sorting by header click
+    document.addEventListener('click', (e)=>{
+      const th = e.target.closest('th[data-key]');
+      if(!th) return; const key=th.dataset.key;
+      if(state.sortKey===key){ state.sortDir = state.sortDir==='asc'?'desc':'asc' } else { state.sortKey=key; state.sortDir='asc' }
+      filter();
+    });
+
+    // CRUD
+    function openItemModal(title='Yeni Ürün'){ el('itemModalTitle').textContent=title; el('itemModal').classList.add('open') }
+    function closeItemModal(){ el('itemModal').classList.remove('open'); el('itemForm').reset(); el('item_id').value='' }
+
+    el('itemForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const body={
+        sku: el('sku').value.trim(),
+        name: el('name').value.trim(),
+        unit: el('unit').value.trim(),
+        unit_price: Number(el('unit_price').value)||0,
+        tax_rate: Number(el('tax_rate').value)||0,
+        stock_qty: Number(el('stock_qty').value)||0
+      };
+      if(!body.sku || !body.name || !body.unit){ toast('SKU/Ad/Birim zorunlu'); return }
+      try{
+        const id=el('item_id').value;
+        if(id) await api(`/items/${id}`,{method:'PUT',body:JSON.stringify(body)});
+        else await api('/items',{method:'POST',body:JSON.stringify(body)});
+        toast(id? 'Ürün güncellendi':'Ürün eklendi'); closeItemModal(); await load();
+      }catch(e){ toast('Hata: '+e.message) }
+    });
+
+    async function editItem(id){
+      try{
+        const data = await api(`/items/${id}`); const it=data.item || data; // tek kayıt dönen endpoint uyumu
+        el('item_id').value=it.item_id; el('sku').value=it.sku||''; el('name').value=it.name||'';
+        el('unit').value=it.unit||''; el('unit_price').value=it.unit_price||0; el('tax_rate').value=it.tax_rate||0; el('stock_qty').value=it.stock_qty||0;
+        openItemModal(`Ürün Düzenle • ${it.sku||it.item_id}`);
+      }catch(e){ toast('Ürün yüklenemedi: '+e.message) }
+    }
+
+    function askDelete(id){ state.pendingDelete=id; el('confirmText').textContent='Bu ürünü silmek üzeresin.'; el('confirmModal').classList.add('open') }
+    function closeConfirm(){ el('confirmModal').classList.remove('open'); state.pendingDelete=null }
+    el('okConfirm').onclick=async()=>{
+      const id=state.pendingDelete; if(!id) return; try{ await api(`/items/${id}`,{method:'DELETE'}); toast('Silindi'); await load() }catch(e){ toast('Silinemedi: '+e.message) } finally{ closeConfirm() }
+    }
+
+    async function adjust(id, delta){
+      try{
+        // Basit yaklaşım: ürünü çek, stock_qty += delta, PUT et
+        const data = await api(`/items/${id}`); const it=data.item || data;
+        const next = Math.max(0, (Number(it.stock_qty)||0) + delta);
+        await api(`/items/${id}`, { method:'PUT', body: JSON.stringify({ ...it, stock_qty: next })});
+        await load();
+      }catch(e){ toast('Stok güncellenemedi: '+e.message) }
+    }
+
+    // Export CSV
+    function exportCSV(){
+      const rows = [['SKU','Ad','Birim','Birim Fiyat','KDV %','Stok']].concat(
+        state.filtered.map(x=>[x.sku,x.name,x.unit,x.unit_price,x.tax_rate,x.stock_qty])
+      );
+      const csv = rows.map(r=> r.map(v=> '"'+String(v??'').replaceAll('"','""')+'"').join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='items.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+
+    // Settings
+    function openSettings(){ el('apiInput').value = localStorage.getItem('apiBase') || API_BASE; el('settingsModal').classList.add('open') }
+    function closeSettings(){ el('settingsModal').classList.remove('open') }
+    function saveSettings(){ const v=el('apiInput').value.trim(); if(!v){ toast('API adresi boş olamaz'); return } localStorage.setItem('apiBase', v); location.reload(); }
+
+    // Events
+    el('q').addEventListener('input', e=>{ state.query=e.target.value; filter() });
+    el('stockFilter').addEventListener('change', e=>{ state.stock=e.target.value; filter() });
+    el('pageSize').addEventListener('change', e=>{ state.pageSize=Number(e.target.value)||25; state.page=1; render() });
+    el('prevPage').addEventListener('click', ()=>{ if(state.page>1){ state.page--; render() } });
+    el('nextPage').addEventListener('click', ()=>{ const max = Math.ceil(state.filtered.length/state.pageSize); if(state.page<max){ state.page++; render() } });
+    el('refreshBtn').addEventListener('click', load);
+    el('newItemBtn').addEventListener('click', ()=>{ el('itemForm').reset(); el('item_id').value=''; openItemModal('Yeni Ürün') });
+    el('exportBtn').addEventListener('click', exportCSV);
+    el('settingsBtn').addEventListener('click', openSettings);
+    el('backBtn').addEventListener('click', ()=>{ window.location.href = 'index.html' });
+
+    // Init
+    load();
+  </script>
+</body>
+</html>

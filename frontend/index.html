@@ -45,7 +45,8 @@
     .tag.onay{background:rgba(79,209,197,.15);color:#aef3ec}
     .empty{padding:18px;text-align:center;color:var(--text-dim)}
     .lines{display:grid;gap:10px}
-    .line{display:grid;grid-template-columns:2fr .1fr 8fr .8fr auto;gap:10px;align-items:center}
+    /* Açıklama | Birim Fiyat | Adet | KDV | Sil */
+    .line{display:grid;grid-template-columns:2fr 1fr .8fr .8fr auto;gap:10px;align-items:center}
     .line .remove{background:transparent;border:1px solid rgba(255,255,255,.12)}
     .foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
     .total{font-weight:700}
@@ -75,6 +76,7 @@
           <button id="exportBtn" type="button" class="btn-soft">CSV Dışa Aktar</button>
           <button id="newBtn" type="button" class="btn-primary">Yeni Fatura</button>
           <button id="settingsBtn" type="button" class="btn-soft">Ayarlar</button>
+          <button id="itemsBtn" type="button" class="btn-soft">Ürün / Stoklar</button>
         </div>
       </div>
       <div class="row" style="margin-top:8px">
@@ -318,12 +320,12 @@
                  oninput="onLineChange(${idx},'description',this.value)" />
         </div>
         <div class="field">
-          <label>Adet</label>
+          <label>Birim Fiyat</label>
           <input type="number" placeholder="0" min="0" value="${data.unit_price||0}" 
                  oninput="onLineChange(${idx},'unit_price',this.value)" />
         </div>
         <div class="field">
-          <label>Birim Fiyat</label>
+          <label>Adet</label>
           <input type="number" placeholder="0" min="0" value="${data.quantity||1}" 
                  oninput="onLineChange(${idx},'quantity',this.value)" />
         </div>
@@ -425,7 +427,6 @@
         const r = await api(`/invoices/${id}/pdf`);
         if(r.status==='success' && r.pdf_path){
           toast('PDF hazır: '+ r.pdf_path);
-          // PDF'i statik klasöre yazarsan:
           // window.open(`${API_BASE}/static/${r.pdf_path.split('/').pop()}`, '_blank');
         } else { toast('PDF üretilemedi') }
       }catch(e){ toast('PDF hatası: '+e.message) }
@@ -442,8 +443,8 @@
         const rows = lines.map(l=> `
           <tr>
             <td>${l.description||'-'}</td>
-            <td>${fmt(Number(l.quantity)||0)}</td>
             <td>${fmt(Number(l.unit_price)||0)}</td>
+            <td>${fmt(Number(l.quantity)||0)}</td>
             <td>${fmt(Number(l.tax_rate)||0)} %</td>
             <td>${fmt((Number(l.quantity)||0)*(Number(l.unit_price)||0))}</td>
           </tr>
@@ -454,7 +455,7 @@
               <thead>
                 <tr>
                   <th>Açıklama</th>
-                  <th>Birim</th>
+                  <th>Birim Fiyat</th>
                   <th>Adet</th>
                   <th>KDV</th>
                   <th>Ara Toplam</th>
@@ -525,6 +526,11 @@
     // Kısayol: Ctrl+Enter = Kaydet
     document.addEventListener('keydown', (e)=>{
       if(e.ctrlKey && e.key === 'Enter'){ el('form').requestSubmit(); }
+    });
+
+    // Stok sayfasına geçiş
+    el('itemsBtn').addEventListener('click', ()=>{
+      window.location.href = 'items.html';
     });
 
     // Init
