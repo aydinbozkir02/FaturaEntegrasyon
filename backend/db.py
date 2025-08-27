@@ -43,10 +43,27 @@ def init_db():
         )
     """)
 
+    # EK: stock_movements tablosu
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS stock_movements (
+            movement_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id     INTEGER NOT NULL,
+            change      INTEGER NOT NULL,         -- +giriş / -çıkış
+            reason      TEXT,                     -- 'manual', 'invoice' vb.
+            ref_table   TEXT,                     -- örn. 'invoices'
+            ref_id      INTEGER,                  -- ilgili kayıt id
+            created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+            FOREIGN KEY (item_id) REFERENCES items(item_id) ON UPDATE CASCADE ON DELETE CASCADE
+        );
+    """)
+
     conn.commit()
     conn.close()
 
 def get_db_connection():
-    conn = sqlite3.connect(DB_NAME)
+    import sqlite3
+    conn = sqlite3.connect('invoices.db')
     conn.row_factory = sqlite3.Row
+    # EK: foreign key desteği
+    conn.execute('PRAGMA foreign_keys = ON;')
     return conn

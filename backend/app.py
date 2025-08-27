@@ -1,7 +1,8 @@
 # app.py
 from flask import Flask, request, jsonify
+from models import get_stock_movements, add_stock_movement
 from flask_cors import CORS
-from db import init_db
+from db import init_db, get_db_connection
 from models import (
     add_invoice, get_all_invoices, update_invoice, delete_invoice,
     get_contacts, get_contact, add_contact, update_contact, delete_contact,
@@ -125,6 +126,29 @@ def remove_item(item_id):
     if not ok:
         return jsonify({"status": "error", "message": "Ürün bulunamadı"}), 404
     return jsonify({"status": "success", "message": f"Ürün {item_id} silindi"}), 200
+
+@app.route('/stock_movements', methods=['GET'])
+def api_list_stock_movements():
+    item_id = request.args.get('item_id', type=int)
+    limit = request.args.get('limit', default=200, type=int)
+    data = get_stock_movements(item_id=item_id, limit=limit)
+    return jsonify({"movements": data})
+
+@app.route('/stock_movements', methods=['POST'])
+def api_add_stock_movement():
+    payload   = request.get_json(force=True) or {}
+    item_id   = payload.get('item_id')
+    change    = payload.get('change')
+    reason    = payload.get('reason', 'manual')
+    ref_table = payload.get('ref_table')
+    ref_id    = payload.get('ref_id')
+
+    res = add_stock_movement(item_id, change, reason, ref_table, ref_id)
+    if not res:
+        return jsonify({"error": "invalid item_id/change or item not found"}), 400
+
+    return jsonify({"status": "ok", **res})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

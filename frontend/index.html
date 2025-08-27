@@ -432,6 +432,22 @@
       }catch(e){ toast('PDF hatası: '+e.message) }
     }
 
+    async function adjust(id, delta){
+      try{
+        await api('/stock_movements', {
+          method: 'POST',
+          body: JSON.stringify({
+            item_id: id,
+            change: delta,
+            reason: 'manual'
+          })
+        });
+        await load(); // tekrar listeyi çek
+      }catch(e){
+        toast('Stok güncellenemedi: ' + (e.message || e));
+      }
+    }
+
     // Detay
     function viewDetail(id){
       const inv = state.data.find(x=> Number(x.invoice_id)===Number(id));
